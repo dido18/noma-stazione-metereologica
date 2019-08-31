@@ -30,6 +30,19 @@ IPAddress server(192, 168, 11, 7);
 EthernetClient ethClient;
 PubSubClient client(ethClient);
 
+unsigned long previousMillis = 0; //
+unsigned long interval = 5000; //intervallo invio dati
+int pin = 7; // anemometro
+double duration = 0; // anemometro
+double periodo = 0; // anemometro
+double velocita = 0; // anemometro
+double raggio = 0.32; // anemometroc
+char temperatura = 0;
+double periodomedia = 0;
+double sommavelocita = 0;
+int contatoremedia = 0;
+double mediavelocita = 0;
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -39,7 +52,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 }
-
 
 void reconnect() {
   // Loop until we're reconnected
@@ -61,21 +73,6 @@ void reconnect() {
     }
   }
 }
-
-
-unsigned long previousMillis = 0; //
-unsigned long interval = 5000; //intervallo invio dati
-int pin = 7; // anemometro
-double duration = 0; // anemometro
-double periodo = 0; // anemometro
-double velocita = 0; // anemometro
-double raggio = 0.32; // anemometroc
-char temperatura = 0;
-double periodomedia = 0;
-double sommavelocita = 0;
-int contatoremedia = 0;
-double mediavelocita = 0;
-
 
 void setup()
 {
@@ -164,12 +161,9 @@ void loop()
 
     //lcd.println(velocita);
     Serial.print("velocita");
-
     Serial.println(velocita);
-
   }
   else
-
   {
     contatoremedia = 0;
     velocita = 0;
@@ -185,12 +179,10 @@ void loop()
   //Serial.println(Vis);
 
   //sensore BME pressione
-
   float pressione = bme.readPressure() / 100.0F;
   //Serial.println(pressione);
 
   //sensore umidità
-
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
@@ -201,7 +193,6 @@ void loop()
   if (isnan(h) || isnan(t) || isnan(f)) {
     // Serial.println(F("Failed to read from DHT sensor!"));
     return;
-
   }
 
 
@@ -231,54 +222,39 @@ void loop()
   }
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis > interval) {
 
+  if (currentMillis - previousMillis > interval) {
     if (velocita == 0 & contatoremedia == 0 )
     {
-      //Serial.println("ciao");
-
-      client.publish("umidita", dtostrf(dht.readHumidity(), 6, 2, msgBuffer)); //trasforma in stringa e invia. Stringa: 6 cifr, 2 virgole
-      client.publish("temperatura", dtostrf(dht.readTemperature(), 6, 2, msgBuffer));
-
-      client.publish("anemometro", dtostrf(mediavelocita, 6, 2, msgBuffer));
-      client.publish("pressione", dtostrf(bme.readPressure(), 6, 2, msgBuffer)); //pressione
-
-      client.publish("visibile", dtostrf(SI1145.ReadVisible(), 6, 2, msgBuffer)); // sensore luminosità
-      client.publish("IR", dtostrf(SI1145.ReadIR(), 6, 2, msgBuffer));
-      client.publish("UV", dtostrf(SI1145.ReadUV() / 100, 6, 2, msgBuffer));
-      client.loop();
+      publish_values_to_mqqt();
     }
     else
     {
-
       //if the LED is off turn it on and vice-versa:
       mediavelocita = sommavelocita / contatoremedia;
       Serial.print("mediavelocita");
       Serial.println(mediavelocita);
       sommavelocita = 0;
       contatoremedia = 0;
-
-      client.publish("umidita", dtostrf(dht.readHumidity(), 6, 2, msgBuffer)); //trasforma in stringa e invia. Stringa: 6 cifr, 2 virgole
-      client.publish("temperatura", dtostrf(dht.readTemperature(), 6, 2, msgBuffer));
-
-      client.publish("anemometro", dtostrf(mediavelocita, 6, 2, msgBuffer));
-      client.publish("pressione", dtostrf(bme.readPressure(), 6, 2, msgBuffer)); //pressione
-
-      client.publish("visibile", dtostrf(SI1145.ReadVisible(), 6, 2, msgBuffer)); // sensore luminosità
-      client.publish("IR", dtostrf(SI1145.ReadIR(), 6, 2, msgBuffer));
-      client.publish("UV", dtostrf(SI1145.ReadUV() / 100, 6, 2, msgBuffer));
-      client.loop();
-
+      publish_values_to_mqqt();
     }
     previousMillis = currentMillis; //save the last time you blinked the LED
   }
 
-
   //   client.publish("temperatura",dtostrf(dht.readTemperature(), 6, 2, msgBuffer));
-  //
   //   client.loop();
+  //   delay(1000);
+}
 
-  //delay(1000);
+void publish_values_to_mqqt(){
+  client.publish("scuola/umidita", dtostrf(dht.readHumidity(), 6, 2, msgBuffer)); //trasforma in stringa e invia. Stringa: 6 cifr, 2 virgole
+  client.publish("scuola/temperatura", dtostrf(dht.readTemperature(), 6, 2, msgBuffer));
+  client.publish("scuola/anemometro", dtostrf(mediavelocita, 6, 2, msgBuffer));
+  client.publish("scuola/pressione", dtostrf(bme.readPressure(), 6, 2, msgBuffer));  //pressione
+  client.publish("scuola/visibile", dtostrf(SI1145.ReadVisible(), 6, 2, msgBuffer)); // sensore luminosità
+  client.publish("scuola/IR", dtostrf(SI1145.ReadIR(), 6, 2, msgBuffer));
+  client.publish("scuola/UV", dtostrf(SI1145.ReadUV() / 100, 6, 2, msgBuffer));
+  client.loop();
 }
 
 

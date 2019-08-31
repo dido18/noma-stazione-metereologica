@@ -31,7 +31,15 @@ protocol websockets
 ```
 
 restart the mosquitto broker.
+### 
 
+"scuola/umidita", 
+"scuola/temperatura", 
+"scuola/anemometro"
+"scuola/pressione", 
+"scuola/visibile",
+"scuola/IR", 
+"scuola/UV"
 ## Prerequisites/Installation
 
 ### Get the files

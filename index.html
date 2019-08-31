@@ -68,7 +68,7 @@
         function onMessageArrived(message) {
             var topic = message.destinationName;
             var payload = message.payloadString;
-            //console.log("Topic: " + topic + ", Message payload: " + payload);
+            console.log("Topic: " + topic + ", Message payload: " + payload);
             $('#message').html(topic + ', ' + payload);
             var message = topic.split('/');
             var area = message[1];
@@ -76,6 +76,10 @@
 
             var timestamp = Math.round((new Date()).getTime() / 1000);
             switch (area) {
+                case 'UV':
+                    pass
+                case 'temperatura':
+                    $('#valueTemp').html('(temperatura value: ' + payload + ')');
                 case 'front': 
                     $('#value1').html('(Switch value: ' + payload + ')');
                     if (payload == 'true') {
@@ -191,6 +195,12 @@
             <div class="panel panel-default">
               <div class="panel-body">
                     <table class="table table-striped">
+                         <!-- Entrace door -->
+                         <tr>
+                            <td width="40%" style="vertical-align:middle;"><h3>Temperatura</h3><small id="valueTemp">(no value recieved)</small></td>
+                            <td style="vertical-align:middle;"></td>
+                            <td width="30%" style="vertical-align:middle;"><h4>&nbsp;<span id="temperatura" class="label">Unknown</span></h4></td>
+                            </tr>
                         <!-- Entrace door -->
                         <tr>
                         <td width="40%" style="vertical-align:middle;"><h3>Entrance</h3><small id="value1">(no value recieved)</small></td>
